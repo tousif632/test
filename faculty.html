@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faculty Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+    }
+    .navbar {
+      background-color: #007bff;
+      color: white;
+      padding: 1rem;
+    }
+    .navbar-brand, .nav-link {
+      color: white;
+    }
+    .add-btn {
+      margin-top: 1rem;
+    }
+    .form-container {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      background-color: #ffffff;
+      border-radius: 5px;
+    }
+    .faculty-list {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Faculty Management</a>
+      <a class="navbar-brand" href="Driver.html">Driver</a>
+      <a class="navbar-brand" href="Student.html">Student</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container mt-4">
+    <h3>Faculty Management</h3>
+    <button class="btn btn-success add-btn" onclick="toggleForm()">Add+</button>
+
+    <!-- Add Faculty Form -->
+    <div class="form-container" id="form-container">
+      <h4>Add New Faculty</h4>
+      <form id="facultyForm">
+        <div class="mb-3">
+          <label for="name" class="form-label">Name</label>
+          <input type="text" class="form-control" id="name" required>
+        </div>
+        <div class="mb-3">
+          <label for="rfid" class="form-label">RFID</label>
+          <input type="text" class="form-control" id="rfid" required>
+        </div>
+        <div class="mb-3">
+          <label for="regNo" class="form-label">Registration Number</label>
+          <input type="text" class="form-control" id="regNo" required>
+        </div>
+        <div class="mb-3">
+          <label for="feeStatus" class="form-label">Fee Status</label>
+          <select class="form-control" id="feeStatus" required>
+            <option value="paid">Paid</option>
+            <option value="unpaid">Unpaid</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="destination" class="form-label">Destination</label>
+          <input type="text" class="form-control" id="destination" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+
+    <!-- Faculty List -->
+    <div class="faculty-list">
+      <h4>Faculty List</h4>
+      <ul id="facultyList" class="list-group"></ul>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:5500"; // Replace with the correct backend URL
+
+    // Toggle form visibility
+    function toggleForm() {
+      const formContainer = document.getElementById("form-container");
+      formContainer.style.display = formContainer.style.display === "none" || formContainer.style.display === "" ? "block" : "none";
+    }
+
+    // Fetch all faculty members from the backend
+    async function fetchFaculties() {
+      const response = await fetch(`${API_URL}/faculty`);
+      const faculties = await response.json();
+      const facultyList = document.getElementById("facultyList");
+      facultyList.innerHTML = ""; // Clear the existing list
+      faculties.forEach(faculty => {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.textContent = `${faculty.name} | ${faculty.rfid} | ${faculty.regNo} | ${faculty.feeStatus} | ${faculty.destination}`;
+        facultyList.appendChild(li);
+      });
+    }
+
+    // Add a new faculty via the backend
+    document.getElementById("facultyForm").addEventListener("submit", async (e) => {
+      e.preventDefault(); // Prevent page reload
+      const name = document.getElementById("name").value;
+      const rfid = document.getElementById("rfid").value;
+      const regNo = document.getElementById("regNo").value;
+      const feeStatus = document.getElementById("feeStatus").value;
+      const destination = document.getElementById("destination").value;
+
+      // Send the data to the backend
+      await fetch(`${API_URL}/faculty`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, rfid, regNo, feeStatus, destination }),
+      });
+
+      document.getElementById("facultyForm").reset(); // Reset the form
+      fetchFaculties(); // Refresh the faculty list
+    });
+
+    // Fetch faculties on page load
+    window.onload = fetchFaculties;
+  </script>
+</body>
+</html>

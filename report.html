@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        .sidebar {
+            width: 200px;
+            background: #333;
+            color: white;
+            height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            margin: 5px 0;
+            background: #444;
+            text-align: center;
+            border-radius: 5px;
+        }
+        .sidebar a:hover {
+            background: #555;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="student.html">Student</a>
+        <a href="buses.html">Buses</a>
+        <a href="faculty.html">Faculty</a>
+        <a href="drivers.html">Driver's</a>
+        <a href="report.html">Report</a>
+    </div>
+    <div class="content">
+        <header>
+            <div class="container">
+                <h1>Google Sheets Data Viewer</h1>
+                <p>Displaying data directly from Google Sheets.</p>
+            </div>
+        </header>
+
+        <main>
+            <section id="data-table">
+                <div class="container">
+                    <h2>Data from Google Sheets</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Registration Number</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sheet-data">
+                            <!-- Data will be loaded dynamically here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="container">
+                <p>&copy; 2025 Google Sheets Viewer. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThq2qnsUO_jBqCLHlP1VZzyWZP72WKQtbLdDw1utmq0_xKkSc7D-mrb5JzF2qdDAKZIlnKZdNkdr6Q/pub?output=csv';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.getElementById('sheet-data');
+
+            fetch(SHEET_CSV_URL)
+                .then(response => response.text())  // Get the response as text (CSV format)
+                .then(data => {
+                    const rows = data.split('\n');  // Split by newline to get individual rows
+                    const tableRows = rows.slice(1);  // Skip the header row
+
+                    tableRows.forEach(row => {
+                        const columns = row.split(',');  // Split each row by comma (CSV format)
+
+                        // Skip empty rows or rows with missing data
+                        if (columns.length < 3) return;
+
+                        const tableRow = document.createElement('tr');
+
+                        // Loop through each column and create a table cell for it
+                        columns.forEach(cell => {
+                            const cellElement = document.createElement('td');
+                            cellElement.textContent = cell || '-';  // Display '-' if the cell is empty
+                            tableRow.appendChild(cellElement);
+                        });
+
+                        tableBody.appendChild(tableRow);  // Append the row to the table body
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching Google Sheets data:', error);
+                    tableBody.innerHTML = `<tr><td colspan="3">Error loading data: ${error.message}</td></tr>`;  // Show an error message if the fetch fails
+                });
+        });
+    </script>
+</body>
+</html>

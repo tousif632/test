@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+    }
+    .navbar {
+      background-color: #007bff;
+      color: white;
+      padding: 1rem;
+    }
+    .navbar-brand, .nav-link {
+      color: white;
+    }
+    .add-btn {
+      margin-top: 1rem;
+    }
+    .form-container {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      background-color: #ffffff;
+      border-radius: 5px;
+    }
+    .student-list {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+<nav class="navbar">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Student Management</a>
+    <!-- Bus Button -->
+    <a class="navbar-brand" href="Driver.html">Driver</a>
+    <a class="navbar-brand" href="faculty.html">Faculty</a>
+  </div>
+</nav>
+
+  <!-- Main Content -->
+  <div class="container mt-4">
+    <h3>Student Management</h3>
+    <button class="btn btn-success add-btn" onclick="toggleForm()">Add+</button>
+
+    <!-- Add Student Form -->
+    <div class="form-container" id="form-container">
+      <h4>Add New Student</h4>
+      <form id="studentForm">
+        <div class="mb-3">
+          <label for="name" class="form-label">Name</label>
+          <input type="text" class="form-control" id="name" required>
+        </div>
+        <div class="mb-3">
+          <label for="rfid" class="form-label">RFID</label>
+          <input type="text" class="form-control" id="rfid" required>
+        </div>
+        <div class="mb-3">
+          <label for="regNo" class="form-label">Registration Number</label>
+          <input type="text" class="form-control" id="regNo" required>
+        </div>
+        <div class="mb-3">
+          <label for="feeStatus" class="form-label">Fee Status</label>
+          <select class="form-control" id="feeStatus" required>
+            <option value="paid">Paid</option>
+            <option value="unpaid">Unpaid</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="destination" class="form-label">Destination</label>
+          <input type="text" class="form-control" id="destination" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+
+    <!-- Student List -->
+    <div class="student-list">
+      <h4>Student List</h4>
+      <ul id="studentList" class="list-group"></ul>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:5500";
+
+    // Toggle form visibility
+    function toggleForm() {
+      const formContainer = document.getElementById("form-container");
+      formContainer.style.display = formContainer.style.display === "none" || formContainer.style.display === "" ? "block" : "none";
+    }
+
+    // Fetch all students from the backend
+    async function fetchStudents() {
+      const response = await fetch(`${API_URL}/students`);
+      const students = await response.json();
+      const studentList = document.getElementById("studentList");
+      studentList.innerHTML = "";
+      students.forEach(student => {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.textContent = `${student.name} | ${student.rfid} | ${student.regNo} | ${student.feeStatus} | ${student.destination}`;
+        studentList.appendChild(li);
+      });
+    }
+
+    // Add a new student via the backend
+    document.getElementById("studentForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const rfid = document.getElementById("rfid").value;
+      const regNo = document.getElementById("regNo").value;
+      const feeStatus = document.getElementById("feeStatus").value;
+      const destination = document.getElementById("destination").value;
+
+      await fetch(`${API_URL}/students`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, rfid, regNo, feeStatus, destination }),
+      });
+
+      document.getElementById("studentForm").reset();
+      fetchStudents();
+    });
+
+    // Fetch students on page load
+    window.onload = fetchStudents;
+  </script>
+</body>
+</html>

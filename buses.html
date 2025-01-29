@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bus Route Management</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    h2 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .form-container {
+      margin-bottom: 30px;
+    }
+
+    form input, form textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    form textarea {
+      height: 100px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .routes-list ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .routes-list li {
+      background-color: #f9f9f9;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .routes-list li h3 {
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    .routes-list li p {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bus Route Management</h1>
+    
+    <!-- Form to add a new bus route -->
+    <div class="form-container">
+      <h2>Add New Bus Route</h2>
+      <form id="busRouteForm">
+        <input type="text" id="routeName" placeholder="Route Name" required />
+        <textarea id="routeStops" placeholder="Route Stops (comma separated)" required></textarea>
+        <input type="text" id="startTime" placeholder="Start Time" required />
+        <input type="text" id="endTime" placeholder="End Time" required />
+        <input type="text" id="busAssigned" placeholder="Bus Assigned" required />
+        <button type="submit">Add Route</button>
+      </form>
+    </div>
+    
+    <!-- Section to display bus routes -->
+    <div class="routes-list">
+      <h2>All Bus Routes</h2>
+      <ul id="busRoutes">
+        <!-- Bus routes will be dynamically inserted here -->
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Fetch and display all bus routes on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchBusRoutes();
+    });
+
+    // Fetch bus routes from the server
+    function fetchBusRoutes() {
+      fetch('http://localhost:5500/busRouteManagement')
+        .then(response => response.json())
+        .then(routes => {
+          const busRoutesList = document.getElementById('busRoutes');
+          busRoutesList.innerHTML = ''; // Clear the current list
+
+          routes.forEach(route => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+              <h3>${route.routeName}</h3>
+              <p><strong>Stops:</strong> ${route.routeStops}</p>
+              <p><strong>Start Time:</strong> ${route.startTime}</p>
+              <p><strong>End Time:</strong> ${route.endTime}</p>
+              <p><strong>Bus Assigned:</strong> ${route.busAssigned}</p>
+            `;
+            busRoutesList.appendChild(li);
+          });
+        })
+        .catch(error => console.error('Error fetching bus routes:', error));
+    }
+
+    // Add a new bus route to the database
+    document.getElementById('busRouteForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const routeName = document.getElementById('routeName').value;
+      const routeStops = document.getElementById('routeStops').value;
+      const startTime = document.getElementById('startTime').value;
+      const endTime = document.getElementById('endTime').value;
+      const busAssigned = document.getElementById('busAssigned').value;
+
+      const busRoute = {
+        routeName,
+        routeStops,
+        startTime,
+        endTime,
+        busAssigned
+      };
+
+      fetch('http://localhost:5500/busRouteManagement', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(busRoute)
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('New bus route added:', data);
+
+          // Add the newly added bus route to the list dynamically without reloading
+          const busRoutesList = document.getElementById('busRoutes');
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <h3>${data.routeName}</h3>
+            <p><strong>Stops:</strong> ${data.routeStops}</p>
+            <p><strong>Start Time:</strong> ${data.startTime}</p>
+            <p><strong>End Time:</strong> ${data.endTime}</p>
+            <p><strong>Bus Assigned:</strong> ${data.busAssigned}</p>
+          `;
+          busRoutesList.appendChild(li);
+
+          // Reset the form
+          document.getElementById('busRouteForm').reset();
+        })
+        .catch(error => console.error('Error adding bus route:', error));
+    });
+  </script>
+</body>
+</html>

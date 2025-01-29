@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bus Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+    }
+    .navbar {
+      background-color: #007bff;
+      color: white;
+      padding: 1rem;
+    }
+    .navbar-brand, .nav-link {
+      color: white;
+    }
+    .add-btn {
+      margin-top: 1rem;
+    }
+    .form-container {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      background-color: #ffffff;
+      border-radius: 5px;
+    }
+    .bus-list {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+<nav class="navbar">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Bus Management</a>
+    <!-- Link to Student Management -->
+    <a class="navbar-brand" href="index.html">Student Management</a>
+  </div>
+</nav>
+
+  <!-- Main Content -->
+  <div class="container mt-4">
+    <h3>Bus Management</h3>
+    <button class="btn btn-success add-btn" onclick="toggleForm()">Add+</button>
+
+    <!-- Add Bus Form -->
+    <div class="form-container" id="form-container">
+      <h4>Add New Bus</h4>
+      <form id="busForm">
+        <div class="mb-3">
+          <label for="busNumber" class="form-label">Bus Number</label>
+          <input type="text" class="form-control" id="busNumber" required>
+        </div>
+        <div class="mb-3">
+          <label for="busName" class="form-label">Bus Name</label>
+          <input type="text" class="form-control" id="busName" required>
+        </div>
+        <div class="mb-3">
+          <label for="phoneNumber" class="form-label">Phone Number</label>
+          <input type="text" class="form-control" id="phoneNumber" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+
+    <!-- Bus List -->
+    <div class="bus-list">
+      <h4>Bus List</h4>
+      <ul id="busList" class="list-group"></ul>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:5500";  // Adjust the API URL to your backend server
+
+    // Toggle form visibility
+    function toggleForm() {
+      const formContainer = document.getElementById("form-container");
+      formContainer.style.display = formContainer.style.display === "none" || formContainer.style.display === "" ? "block" : "none";
+    }
+
+    // Fetch all buses from the backend
+    async function fetchBuses() {
+      const response = await fetch(`${API_URL}/buses`);
+      const buses = await response.json();
+      const busList = document.getElementById("busList");
+      busList.innerHTML = "";
+      buses.forEach(bus => {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.textContent = `${bus.busNumber} | ${bus.busName} | ${bus.phoneNumber}`;
+        busList.appendChild(li);
+      });
+    }
+
+    // Add a new bus via the backend
+    document.getElementById("busForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const busNumber = document.getElementById("busNumber").value;
+      const busName = document.getElementById("busName").value;
+      const phoneNumber = document.getElementById("phoneNumber").value;
+
+      await fetch(`${API_URL}/buses`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ busNumber, busName, phoneNumber }),
+      });
+
+      document.getElementById("busForm").reset();
+      fetchBuses();
+    });
+
+    // Fetch buses on page load
+    window.onload = fetchBuses;
+  </script>
+</body>
+</html>
