@@ -11,9 +11,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // MongoDB Atlas connection URI
-const mongoURI = "mongodb+srv://tousifahmed3025:Tanveer%40%402009@rfid.g1l6k.mongodb.net/?retryWrites=true&w=majority&appName=rfid";
-
-// MongoDB connection
+const mongoURI = 
 mongoose.connect(mongoURI)
   .then(() => console.log('MongoDB Atlas Connected'))
   .catch((err) => console.log('Error connecting to MongoDB Atlas:', err));
